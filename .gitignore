@@ -1,0 +1,68 @@
+# ========================
+# Python
+# ========================
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+eggs/
+lib/
+lib64/
+wheels/
+.installed.cfg
+*.egg
+
+# ========================
+# Virtual Environments
+# ========================
+.venv/
+venv/
+env/
+ENV/
+.env
+!.env.example
+
+# ========================
+# Model Artifacts (large files - manage via DVC or Git LFS)
+# ========================
+models/*.pth
+
+# ========================
+# IDE & Editor
+# ========================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ========================
+# Testing & Coverage
+# ========================
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# ========================
+# Logs
+# ========================
+logs/
+*.log
+
+# ========================
+# OS
+# ========================
+.DS_Store
+Thumbs.db
+
+# ========================
+# Temporary / Misc
+# ========================
+*.tmp
+*.bak
