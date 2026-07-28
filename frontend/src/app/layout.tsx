@@ -36,20 +36,20 @@ export default function RootLayout({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const menuItems = [
-    { name: "Detection", href: "/", icon: Leaf },
+    { name: "Detection", href: "/?reset=true", icon: Leaf },
     { name: "History", href: "/history", icon: HistoryIcon },
     { name: "Profile", href: "#", icon: User },
   ];
 
   const handleStartNewScan = () => {
     setIsMobileMenuOpen(false);
-    // Navigate to root without query params to trigger fresh state
-    router.push("/");
+    // Navigate to root with reset param to trigger state clearing
+    router.push("/?reset=true");
   };
 
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
-      <body className="min-h-full flex bg-slate-950 text-slate-100 font-sans overflow-hidden">
+      <body className="h-screen w-screen flex bg-slate-950 text-slate-100 font-sans overflow-hidden">
         
         {/* ============================================== DESKTOP SIDEBAR */}
         <aside className="hidden md:flex w-72 bg-slate-950 border-r border-slate-905 flex-col shrink-0">
@@ -70,7 +70,7 @@ export default function RootLayout({
           <nav className="flex-1 p-4 space-y-1.5">
             {menuItems.map((item) => {
               const Icon = item.icon;
-              const isActive = pathname === item.href;
+              const isActive = pathname === item.href.split("?")[0];
               return (
                 <Link
                   key={item.name}
@@ -150,7 +150,7 @@ export default function RootLayout({
                 <nav className="flex-1 p-4 space-y-1.5">
                   {menuItems.map((item) => {
                     const Icon = item.icon;
-                    const isActive = pathname === item.href;
+                    const isActive = pathname === item.href.split("?")[0];
                     return (
                       <Link
                         key={item.name}
@@ -185,7 +185,7 @@ export default function RootLayout({
           )}
 
           {/* Children container */}
-          <main className="flex-1 flex flex-col overflow-hidden relative bg-slate-900">
+          <main className="flex-1 flex flex-col overflow-hidden relative bg-slate-900 h-full min-h-0">
             {children}
           </main>
         </div>

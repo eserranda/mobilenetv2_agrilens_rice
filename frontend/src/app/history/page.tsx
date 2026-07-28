@@ -138,7 +138,7 @@ export default function HistoryPage() {
   const paginationRange = Array.from({ length: Math.min(5, totalPages) }, (_, i) => i + 1);
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden">
+    <div className="flex-1 flex flex-col overflow-hidden h-full min-h-0">
       {/* ============================================== TOP BAR / FILTER ACTIONS */}
       <header className="h-16 border-b border-slate-900 px-6 flex items-center justify-between shrink-0 bg-slate-950/50">
         <div className="flex-1 max-w-md relative hidden md:block">
@@ -318,7 +318,7 @@ export default function HistoryPage() {
 
                     {/* Link button to Detection result page */}
                     <Link 
-                      href={`/?id=${item.id}`}
+                      href={`/detection?id=${item.id}`}
                       className="w-full flex items-center justify-center gap-1.5 py-2.5 border border-slate-800 hover:border-slate-700 hover:bg-slate-900 rounded-xl text-xs font-bold text-emerald-400 hover:text-emerald-300 transition mt-6"
                     >
                       View Detail
@@ -383,7 +383,7 @@ export default function HistoryPage() {
 
       {/* Floating Action Button (FAB) on bottom right for mobile/scrolling scans */}
       <Link
-        href="/"
+        href="/detection"
         className="fixed bottom-6 right-6 h-14 w-14 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white shadow-xl shadow-emerald-600/35 hover:scale-105 active:scale-95 flex items-center justify-center transition duration-200 z-40 border border-emerald-500"
         title="Mulai Scan Baru"
       >
