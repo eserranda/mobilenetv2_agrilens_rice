@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.venv/
+venv/
+env/
+.env
+
+# Testing & Development
+tests/
+training/
+scripts/
+scratch/
+.git/
+.gitignore
+.agents/
+AGENTS.md
+implementation_plan.md
+task.md
+walkthrough.md
+README.md
+prd.md
+LICENSE

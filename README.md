@@ -201,3 +201,7 @@ pytest tests/ -v
 ## 📄 License
 
 MIT License — lihat [LICENSE](LICENSE).
+
+
+# Jalankan server FastAPI dengan auto-reload (untuk development)
+.\.venv\Scripts\uvicorn app.main:app --reload

@@ -1,0 +1,35 @@
+services:
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: rice_disease_api
+    ports:
+      - "8000:8000"
+    # Membaca konfigurasi environment variables (seperti OPENAI_API_KEY) secara otomatis dari file .env
+    env_file:
+      - ./backend/.env
+    # Volume mounting: Mengaitkan folder lokal ke dalam container untuk persistensi data.
+    volumes:
+      - ./backend/models:/app/models
+      - ./backend/uploads:/app/uploads
+      - ./backend/db_data:/app/db_data
+    restart: always
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: rice_disease_frontend
+    ports:
+      - "3000:3000"
+    command: npm run dev
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    depends_on:
+      - api
+    restart: always
