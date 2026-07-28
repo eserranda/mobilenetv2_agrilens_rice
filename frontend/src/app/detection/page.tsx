@@ -18,7 +18,9 @@ import {
   FlaskConical,
   Ban,
   Activity,
-  Cpu
+  Cpu,
+  Trash2,
+  Play
 } from "lucide-react";
 import { 
   detectDisease, 
@@ -115,10 +117,8 @@ function DetectionContent() {
     setPreviewUrl(url);
     setResult(null);
     setError(null);
-    // Clear search param
+    // Clear search param and transition to preview state
     router.replace("/detection");
-    // Trigger detection process automatically
-    handleSubmit(file);
   };
 
   // --- Drag & Drop ---
@@ -142,13 +142,12 @@ function DetectionContent() {
   };
 
   // --- Submit detection request ---
-  const handleSubmit = async (fileToSubmit?: File) => {
-    const file = fileToSubmit || selectedFile;
-    if (!file) return;
+  const handleSubmit = async () => {
+    if (!selectedFile) return;
     setIsLoading(true);
     setError(null);
     try {
-      const data = await detectDisease(file);
+      const data = await detectDisease(selectedFile);
       setResult(data);
     } catch (err: any) {
       setError(err.message || "Gagal memproses gambar. Pastikan format dan koneksi sesuai.");
@@ -261,7 +260,8 @@ function DetectionContent() {
             className="hidden"
           />
 
-          {isLoading && !result && (
+          {/* 1. Loading screen takes absolute priority */}
+          {isLoading && (
             /* Analysis Loading Screen */
             <div className="border border-slate-850/80 bg-slate-950/40 rounded-3xl p-12 text-center flex flex-col items-center justify-center min-h-[400px]">
               <Loader2 className="h-12 w-12 text-emerald-400 animate-spin mb-4" />
@@ -272,280 +272,343 @@ function DetectionContent() {
             </div>
           )}
 
-          {!isLoading && !result && (
-            /* Upload Screen (Desktop Drag-drop / Mobile Camera button) */
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-              <div className="lg:col-span-12">
-                <div 
-                  className={cn(
-                    "hidden md:flex border-2 border-dashed rounded-3xl p-12 transition duration-300 flex-col items-center justify-center min-h-[350px] relative overflow-hidden cursor-pointer",
-                    dragActive 
-                      ? "border-emerald-500 bg-emerald-500/5 shadow-lg shadow-emerald-500/5" 
-                      : "bg-slate-950/20 border-slate-800 hover:border-slate-700"
-                  )}
-                >
-                  <input
-                    type="file"
-                    onChange={handleFileChange}
-                    onDragEnter={handleDrag}
-                    onDragOver={handleDrag}
-                    onDragLeave={handleDrag}
-                    onDrop={handleDrop}
-                    accept="image/*"
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                  />
-                  <div className="h-16 w-16 rounded-2xl bg-slate-850 border border-slate-800 flex items-center justify-center text-emerald-400 mb-4 hover:scale-105 transition duration-300">
-                    <Upload className="h-6 w-6" />
-                  </div>
-                  <h3 className="font-bold text-slate-200 text-lg">Unggah Gambar Daun Padi</h3>
-                  <p className="text-xs text-slate-550 max-w-xs mt-1 text-center">
-                    Seret & lepas foto di sini, atau klik untuk memilih file dari komputer Anda (JPG, PNG, WebP)
-                  </p>
-                </div>
-
-                {/* Mobile Upload Area */}
-                <div className="block md:hidden border border-slate-800 rounded-3xl p-8 bg-slate-950/20 backdrop-blur-md text-center relative overflow-hidden">
-                  <input
-                    type="file"
-                    onChange={handleFileChange}
-                    accept="image/*"
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                  />
-                  <div className="flex flex-col items-center justify-center">
-                    <div className="h-14 w-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-4">
-                      <Camera className="h-6 w-6" />
-                    </div>
-                    <h3 className="font-bold text-slate-200 text-base">Ambil Foto / Pilih File</h3>
-                    <p className="text-xs text-slate-550 max-w-xs mt-2 mb-6 leading-relaxed">
-                      Ambil foto daun padi secara langsung menggunakan kamera HP Anda, atau pilih file gambar yang sudah ada.
-                    </p>
-                    <button
-                      type="button"
-                      className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 rounded-2xl font-semibold flex items-center justify-center gap-2 transition duration-200 text-sm text-white"
-                    >
-                      <Camera className="h-4.5 w-4.5" />
-                      Ambil Foto / Pilih File
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {result && !isLoading && (
-            /* ============================================== RESULT VIEW (AgriLens Pro layout) */
-            <div className="space-y-6">
-              
-              {/* TOP ROW: Leaf Image & Disease Card */}
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
-                
-                {/* 1. Image Preview Panel */}
-                <div className="md:col-span-5 space-y-4">
-                  <div className="border border-slate-800/80 bg-slate-950/40 rounded-3xl p-4 relative backdrop-blur-md">
-                    <div className="w-full aspect-square relative rounded-2xl overflow-hidden border border-slate-900 bg-slate-950">
-                      <img
-                        src={getImageSource()!}
-                        alt={result.disease}
-                        className="h-full w-full object-contain"
-                      />
-                      
-                      {/* AI Verified badge overlay */}
-                      <span className="absolute top-3 left-3 bg-emerald-500/80 backdrop-blur-md text-white text-[10px] font-bold tracking-wider px-2.5 py-1 rounded-full uppercase border border-emerald-400/25">
-                        AI Verified
-                      </span>
-                    </div>
-
-                    {/* Scan actions below image */}
-                    <div className="grid grid-cols-2 gap-3 mt-4">
-                      <button 
-                        onClick={triggerFileInput}
-                        className="py-2.5 bg-emerald-800 hover:bg-emerald-700 active:bg-emerald-900 text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition"
-                      >
-                        <Camera className="h-4 w-4" />
-                        Scan New
-                      </button>
-                      <button 
-                        onClick={triggerFileInput}
-                        className="py-2.5 bg-slate-900 hover:bg-slate-855 text-emerald-400 hover:text-emerald-300 border border-slate-800 hover:border-slate-700 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition"
-                      >
-                        <Upload className="h-4 w-4" />
-                        Upload File
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 2. Disease details card */}
-                <div className="md:col-span-7 space-y-6">
-                  
-                  {/* Title and Matching bar */}
-                  <div className="border border-slate-800/80 bg-slate-950/40 rounded-3xl p-6 backdrop-blur-md relative">
-                    <div className="flex flex-wrap items-start justify-between gap-4">
-                      <div>
-                        <h2 className="text-2xl font-extrabold text-white">{result.disease}</h2>
-                        <p className="text-xs text-slate-400 italic mt-1.5 font-medium">
-                          {SCIENTIFIC_NAMES[result.disease] || "Oryza sativa pathogens"}
-                        </p>
-                      </div>
-
-                      {/* Action / Healthy status pill */}
-                      {result.disease === "Healthy" ? (
-                        <div className="px-3 py-1 text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full flex items-center gap-1">
-                          <CheckCircle className="h-3.5 w-3.5" />
-                          SEHAT / AMAN
-                        </div>
-                      ) : (
-                        <div className="px-3 py-1 text-[10px] font-bold bg-rose-500/10 text-rose-500 border border-rose-500/20 rounded-full flex items-center gap-1">
-                          <AlertTriangle className="h-3.5 w-3.5" />
-                          ACTION REQUIRED
-                        </div>
+          {/* 2. Standard Screen when not loading */}
+          {!isLoading && (
+            <>
+              {/* STATE A: EMPTY UPLOAD STATE */}
+              {!previewUrl && !result && (
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                  <div className="lg:col-span-12">
+                    {/* Desktop Upload Area */}
+                    <div 
+                      className={cn(
+                        "hidden md:flex border-2 border-dashed rounded-3xl p-12 transition duration-300 flex-col items-center justify-center min-h-[350px] relative overflow-hidden cursor-pointer",
+                        dragActive 
+                          ? "border-emerald-500 bg-emerald-500/5 shadow-lg shadow-emerald-500/5" 
+                          : "bg-slate-950/20 border-slate-800 hover:border-slate-700"
                       )}
-                    </div>
-
-                    {/* Progress Gauge */}
-                    <div className="mt-8 space-y-2">
-                      <div className="flex items-center justify-between text-xs font-semibold">
-                        <span className="text-slate-400">MobileNetV2 Match Confidence</span>
-                        <span className="text-emerald-400">{Math.round(result.confidence * 100)}%</span>
+                    >
+                      <input
+                        type="file"
+                        onChange={handleFileChange}
+                        onDragEnter={handleDrag}
+                        onDragOver={handleDrag}
+                        onDragLeave={handleDrag}
+                        onDrop={handleDrop}
+                        accept="image/*"
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                      />
+                      <div className="h-16 w-16 rounded-2xl bg-slate-850 border border-slate-800 flex items-center justify-center text-emerald-400 mb-4 hover:scale-105 transition duration-300">
+                        <Upload className="h-6 w-6" />
                       </div>
-                      <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-1000 ease-out"
-                          style={{ width: `${result.confidence * 100}%` }}
-                        />
-                      </div>
-                      <p className="text-[10px] text-slate-500 text-right">
-                        Inference Time: {result.inference_time_ms.toFixed(1)} ms
+                      <h3 className="font-bold text-slate-200 text-lg">Unggah Gambar Daun Padi</h3>
+                      <p className="text-xs text-slate-550 max-w-xs mt-1 text-center">
+                        Seret & lepas foto di sini, atau klik untuk memilih file dari komputer Anda (JPG, PNG, WebP)
                       </p>
                     </div>
-                  </div>
 
-                  {/* Two columns details: Symptoms observed & Recommended actions */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    
-                    {/* Symptoms observed Card */}
-                    <div className="border border-slate-800/80 bg-slate-950/40 rounded-3xl p-5 backdrop-blur-md">
-                      <div className="flex items-center gap-2 mb-4 border-b border-slate-800/60 pb-3">
-                        <Eye className="h-5 w-5 text-emerald-400" />
-                        <h4 className="font-bold text-sm text-slate-200">Symptoms Observed</h4>
-                      </div>
-                      
-                      {result.explanation ? (
-                        <ul className="space-y-3">
-                          {formatBulletPoints(result.explanation).map((pt, i) => (
-                            <li key={i} className="text-xs text-slate-300 leading-relaxed flex items-start gap-2">
-                              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
-                              <span>{pt}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      ) : (
-                        <p className="text-xs text-slate-500 italic">Tidak ada deskripsi gejala teramati.</p>
-                      )}
-                    </div>
-
-                    {/* Recommended actions Card */}
-                    <div className="border border-slate-800/80 bg-slate-950/40 rounded-3xl p-5 backdrop-blur-md">
-                      <div className="flex items-center gap-2 mb-4 border-b border-slate-800/60 pb-3">
-                        <ClipboardList className="h-5 w-5 text-emerald-400" />
-                        <h4 className="font-bold text-sm text-slate-200">Recommended Actions</h4>
-                      </div>
-
-                      {result.recommendation ? (
-                        <ul className="space-y-3">
-                          {formatBulletPoints(result.recommendation).map((pt, i) => (
-                            <li key={i} className="text-xs text-slate-350 leading-relaxed flex items-start gap-3 bg-slate-900/30 p-2.5 rounded-xl border border-slate-800/30">
-                              <div className="h-7 w-7 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0 mt-0.5">
-                                {getRecommendationIcon(i)}
-                              </div>
-                              <span>{pt}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      ) : (
-                        <p className="text-xs text-slate-500 italic">Tidak ada rekomendasi penanganan.</p>
-                      )}
-                    </div>
-
-                  </div>
-
-                </div>
-
-              </div>
-
-              {/* BOTTOM ROW: Timeline AI Diagnostic Reasoning (CoT) */}
-              {result.thinking && (
-                <div className="border border-slate-800/85 bg-slate-950/40 rounded-3xl p-6 backdrop-blur-md space-y-6">
-                  
-                  {/* Section Title */}
-                  <div className="flex items-center gap-2 border-b border-slate-800/80 pb-4">
-                    <Activity className="h-5 w-5 text-emerald-400" />
-                    <h3 className="font-bold text-base text-white">AI Diagnostic Reasoning</h3>
-                  </div>
-
-                  {/* Custom Timeline steps */}
-                  <div className="space-y-6 relative before:absolute before:left-3 before:top-2 before:bottom-2 before:w-[1px] before:bg-slate-800">
-                    
-                    {/* Step 1: Pre-processing */}
-                    <div className="flex gap-4 relative">
-                      <div className="h-6.5 w-6.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center z-10 shrink-0 text-emerald-400">
-                        <CheckCircle className="h-4.5 w-4.5 text-emerald-400" />
-                      </div>
-                      <div className="space-y-1">
-                        <h5 className="font-bold text-xs text-slate-200 tracking-wide">Image Pre-processing Complete</h5>
-                        <p className="text-xs text-slate-450 leading-relaxed max-w-2xl">
-                          Normalisasi dan scaling citra diaplikasikan. Matriks input [{("metadata" in result && result.metadata && result.metadata.input_size) ? result.metadata.input_size.join("x") : "224x224"}] disiapkan untuk pemetaan fitur MobileNetV2.
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Step 2: Feature Extraction */}
-                    <div className="flex gap-4 relative">
-                      <div className="h-6.5 w-6.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center z-10 shrink-0 text-emerald-400">
-                        <CheckCircle className="h-4.5 w-4.5 text-emerald-400" />
-                      </div>
-                      <div className="space-y-1">
-                        <h5 className="font-bold text-xs text-slate-200 tracking-wide">Feature Extraction</h5>
-                        <p className="text-xs text-slate-450 leading-relaxed max-w-2xl">
-                          Model ekstraktor MobileNetV2 mengidentifikasi bentuk, gradien warna klorosis, dan kluster lesi nekrotik pada permukaan daun padi.
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Step 3: Multimodal Cross-Reference */}
-                    <div className="flex gap-4 relative">
-                      <div className="h-6.5 w-6.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center z-10 shrink-0 text-emerald-400">
-                        <CheckCircle className="h-4.5 w-4.5 text-emerald-400" />
-                      </div>
-                      <div className="space-y-1">
-                        <h5 className="font-bold text-xs text-slate-200 tracking-wide">Multimodal Cross-Reference</h5>
-                        <p className="text-xs text-slate-450 leading-relaxed max-w-2xl">
-                          Mengintegrasikan bobot probabilitas model klasifikasi visi dengan penalaran logika AI Pathologist menggunakan basis pengetahuan diagnosis padi.
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Step 4: OpenAI CoT Reasoning */}
-                    <div className="flex gap-4 relative">
-                      <div className="h-6.5 w-6.5 rounded-full bg-emerald-500 border border-emerald-400 flex items-center justify-center z-10 shrink-0 text-slate-950">
-                        <Cpu className="h-3.5 w-3.5 text-slate-950 font-bold" />
-                      </div>
-                      <div className="space-y-2 flex-1">
-                        <h5 className="font-bold text-xs text-emerald-400 tracking-wide">Diagnostic Finalization & Chain-of-Thought</h5>
-                        
-                        <div className="bg-slate-950/60 p-4 rounded-2xl border border-slate-800/80 max-w-4xl">
-                          <p className="text-xs text-slate-350 leading-relaxed font-mono whitespace-pre-line select-text">
-                            {result.thinking}
-                          </p>
+                    {/* Mobile Upload Area */}
+                    <div className="block md:hidden border border-slate-800 rounded-3xl p-8 bg-slate-950/20 backdrop-blur-md text-center relative overflow-hidden">
+                      <input
+                        type="file"
+                        onChange={handleFileChange}
+                        accept="image/*"
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                      />
+                      <div className="flex flex-col items-center justify-center">
+                        <div className="h-14 w-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-4">
+                          <Camera className="h-6 w-6" />
                         </div>
+                        <h3 className="font-bold text-slate-200 text-base">Ambil Foto / Pilih File</h3>
+                        <p className="text-xs text-slate-500 max-w-xs mt-2 mb-6 leading-relaxed">
+                          Ambil foto daun padi secara langsung menggunakan kamera HP Anda, atau pilih file gambar yang sudah ada.
+                        </p>
+                        <button
+                          type="button"
+                          className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 rounded-2xl font-semibold flex items-center justify-center gap-2 transition duration-200 text-sm text-white"
+                        >
+                          <Camera className="h-4.5 w-4.5" />
+                          Ambil Foto / Pilih File
+                        </button>
                       </div>
                     </div>
-
                   </div>
                 </div>
               )}
 
-            </div>
+              {/* STATE B: PREVIEW STATE (Selected file but not yet analyzed) */}
+              {previewUrl && !result && (
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start animate-fade-in">
+                  
+                  {/* Left Column: Image with two action buttons */}
+                  <div className="md:col-span-5 space-y-4">
+                    <div className="border border-slate-800/80 bg-slate-950/40 rounded-3xl p-4 relative backdrop-blur-md">
+                      <div className="w-full aspect-square relative rounded-2xl overflow-hidden border border-slate-900 bg-slate-950">
+                        <img
+                          src={previewUrl}
+                          alt="Rice leaf preview"
+                          className="h-full w-full object-contain"
+                        />
+                        <span className="absolute top-3 left-3 bg-amber-500/80 backdrop-blur-md text-white text-[10px] font-bold tracking-wider px-2.5 py-1 rounded-full uppercase border border-amber-400/25">
+                          Ready for analysis
+                        </span>
+                      </div>
+
+                      {/* Action buttons: Analisis and Hapus/Batal */}
+                      <div className="grid grid-cols-2 gap-3 mt-4">
+                        <button 
+                          onClick={handleSubmit}
+                          className="py-2.5 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition shadow-lg shadow-emerald-600/10"
+                        >
+                          <Play className="h-4 w-4 shrink-0 fill-current" />
+                          Analisis Gambar
+                        </button>
+                        <button 
+                          onClick={resetAll}
+                          className="py-2.5 bg-slate-900 hover:bg-slate-855 text-rose-400 hover:text-rose-300 border border-slate-800 hover:border-slate-700 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition"
+                        >
+                          <Trash2 className="h-4 w-4 shrink-0" />
+                          Hapus / Reset
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Column: Information Guidance box */}
+                  <div className="md:col-span-7">
+                    <div className="border border-slate-850/80 bg-slate-950/40 rounded-3xl p-8 backdrop-blur-md relative flex flex-col items-center justify-center text-center min-h-[350px]">
+                      <div className="h-16 w-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-6 animate-pulse">
+                        <Cpu className="h-8 w-8" />
+                      </div>
+                      <h3 className="text-xl font-extrabold text-white tracking-wide">Daun Padi Siap Dianalisis</h3>
+                      <p className="text-xs text-slate-400 max-w-sm mt-3 leading-relaxed">
+                        Gambar berhasil dimuat ke memori lokal. Kecerdasan Buatan AgriLens Pro siap mengekstrak ciri visual dan mendiagnosis patologi tanaman padi secara presisi.
+                      </p>
+                      <p className="text-xs text-emerald-500 font-bold mt-5 leading-relaxed bg-emerald-500/5 px-4 py-2 rounded-xl border border-emerald-500/10">
+                        Silakan tekan tombol <span className="underline">Analisis Gambar</span> di bawah foto untuk memulai diagnosis AI.
+                      </p>
+                    </div>
+                  </div>
+
+                </div>
+              )}
+
+              {/* STATE C: RESULT VIEW (Analysis results rendered) */}
+              {result && (
+                <div className="space-y-6">
+                  
+                  {/* TOP ROW: Leaf Image & Disease Card */}
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+                    
+                    {/* 1. Image Preview Panel */}
+                    <div className="md:col-span-5 space-y-4">
+                      <div className="border border-slate-800/80 bg-slate-950/40 rounded-3xl p-4 relative backdrop-blur-md">
+                        <div className="w-full aspect-square relative rounded-2xl overflow-hidden border border-slate-900 bg-slate-950">
+                          <img
+                            src={getImageSource()!}
+                            alt={result.disease}
+                            className="h-full w-full object-contain"
+                          />
+                          
+                          {/* AI Verified badge overlay */}
+                          <span className="absolute top-3 left-3 bg-emerald-500/80 backdrop-blur-md text-white text-[10px] font-bold tracking-wider px-2.5 py-1 rounded-full uppercase border border-emerald-400/25">
+                            AI Verified
+                          </span>
+                        </div>
+
+                        {/* Scan actions below image */}
+                        <div className="grid grid-cols-2 gap-3 mt-4">
+                          <button 
+                            onClick={triggerFileInput}
+                            className="py-2.5 bg-emerald-800 hover:bg-emerald-700 active:bg-emerald-900 text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition"
+                          >
+                            <Camera className="h-4 w-4" />
+                            Scan New
+                          </button>
+                          <button 
+                            onClick={triggerFileInput}
+                            className="py-2.5 bg-slate-900 hover:bg-slate-855 text-emerald-400 hover:text-emerald-300 border border-slate-800 hover:border-slate-700 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition"
+                          >
+                            <Upload className="h-4 w-4" />
+                            Upload File
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 2. Disease details card */}
+                    <div className="md:col-span-7 space-y-6">
+                      
+                      {/* Title and Matching bar */}
+                      <div className="border border-slate-800/80 bg-slate-950/40 rounded-3xl p-6 backdrop-blur-md relative">
+                        <div className="flex flex-wrap items-start justify-between gap-4">
+                          <div>
+                            <h2 className="text-2xl font-extrabold text-white">{result.disease}</h2>
+                            <p className="text-xs text-slate-400 italic mt-1.5 font-medium">
+                              {SCIENTIFIC_NAMES[result.disease] || "Oryza sativa pathogens"}
+                            </p>
+                          </div>
+
+                          {/* Action / Healthy status pill */}
+                          {result.disease === "Healthy" ? (
+                            <div className="px-3 py-1 text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full flex items-center gap-1">
+                              <CheckCircle className="h-3.5 w-3.5" />
+                              SEHAT / AMAN
+                            </div>
+                          ) : (
+                            <div className="px-3 py-1 text-[10px] font-bold bg-rose-500/10 text-rose-500 border border-rose-500/20 rounded-full flex items-center gap-1">
+                              <AlertTriangle className="h-3.5 w-3.5" />
+                              ACTION REQUIRED
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Progress Gauge */}
+                        <div className="mt-8 space-y-2">
+                          <div className="flex items-center justify-between text-xs font-semibold">
+                            <span className="text-slate-400">MobileNetV2 Match Confidence</span>
+                            <span className="text-emerald-400">{Math.round(result.confidence * 100)}%</span>
+                          </div>
+                          <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
+                            <div 
+                              className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-1000 ease-out"
+                              style={{ width: `${result.confidence * 100}%` }}
+                            />
+                          </div>
+                          <p className="text-[10px] text-slate-500 text-right">
+                            Inference Time: {result.inference_time_ms.toFixed(1)} ms
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Two columns details: Symptoms observed & Recommended actions */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        
+                        {/* Symptoms observed Card */}
+                        <div className="border border-slate-800/80 bg-slate-950/40 rounded-3xl p-5 backdrop-blur-md">
+                          <div className="flex items-center gap-2 mb-4 border-b border-slate-800/60 pb-3">
+                            <Eye className="h-5 w-5 text-emerald-400" />
+                            <h4 className="font-bold text-sm text-slate-200">Symptoms Observed</h4>
+                          </div>
+                          
+                          {result.explanation ? (
+                            <ul className="space-y-3">
+                              {formatBulletPoints(result.explanation).map((pt, i) => (
+                                <li key={i} className="text-xs text-slate-300 leading-relaxed flex items-start gap-2">
+                                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
+                                  <span>{pt}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <p className="text-xs text-slate-550 italic">Tidak ada deskripsi gejala teramati.</p>
+                          )}
+                        </div>
+
+                        {/* Recommended actions Card */}
+                        <div className="border border-slate-800/80 bg-slate-950/40 rounded-3xl p-5 backdrop-blur-md">
+                          <div className="flex items-center gap-2 mb-4 border-b border-slate-800/60 pb-3">
+                            <ClipboardList className="h-5 w-5 text-emerald-400" />
+                            <h4 className="font-bold text-sm text-slate-200">Recommended Actions</h4>
+                          </div>
+
+                          {result.recommendation ? (
+                            <ul className="space-y-3">
+                              {formatBulletPoints(result.recommendation).map((pt, i) => (
+                                <li key={i} className="text-xs text-slate-350 leading-relaxed flex items-start gap-3 bg-slate-900/30 p-2.5 rounded-xl border border-slate-800/30">
+                                  <div className="h-7 w-7 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0 mt-0.5">
+                                    {getRecommendationIcon(i)}
+                                  </div>
+                                  <span>{pt}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <p className="text-xs text-slate-550 italic">Tidak ada rekomendasi penanganan.</p>
+                          )}
+                        </div>
+
+                      </div>
+
+                    </div>
+
+                  </div>
+
+                  {/* BOTTOM ROW: Timeline AI Diagnostic Reasoning (CoT) */}
+                  {result.thinking && (
+                    <div className="border border-slate-800/85 bg-slate-950/40 rounded-3xl p-6 backdrop-blur-md space-y-6">
+                      
+                      {/* Section Title */}
+                      <div className="flex items-center gap-2 border-b border-slate-800/80 pb-4">
+                        <Activity className="h-5 w-5 text-emerald-400" />
+                        <h3 className="font-bold text-base text-white">AI Diagnostic Reasoning</h3>
+                      </div>
+
+                      {/* Custom Timeline steps */}
+                      <div className="space-y-6 relative before:absolute before:left-3 before:top-2 before:bottom-2 before:w-[1px] before:bg-slate-800">
+                        
+                        {/* Step 1: Pre-processing */}
+                        <div className="flex gap-4 relative">
+                          <div className="h-6.5 w-6.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center z-10 shrink-0 text-emerald-400">
+                            <CheckCircle className="h-4.5 w-4.5 text-emerald-400" />
+                          </div>
+                          <div className="space-y-1">
+                            <h5 className="font-bold text-xs text-slate-200 tracking-wide">Image Pre-processing Complete</h5>
+                            <p className="text-xs text-slate-450 leading-relaxed max-w-2xl">
+                              Normalisasi dan scaling citra diaplikasikan. Matriks input [{("metadata" in result && result.metadata && result.metadata.input_size) ? result.metadata.input_size.join("x") : "224x224"}] disiapkan untuk pemetaan fitur MobileNetV2.
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Step 2: Feature Extraction */}
+                        <div className="flex gap-4 relative">
+                          <div className="h-6.5 w-6.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center z-10 shrink-0 text-emerald-400">
+                            <CheckCircle className="h-4.5 w-4.5 text-emerald-400" />
+                          </div>
+                          <div className="space-y-1">
+                            <h5 className="font-bold text-xs text-slate-200 tracking-wide">Feature Extraction</h5>
+                            <p className="text-xs text-slate-450 leading-relaxed max-w-2xl">
+                              Model ekstraktor MobileNetV2 mengidentifikasi bentuk, gradien warna klorosis, dan kluster lesi nekrotik pada permukaan daun padi.
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Step 3: Multimodal Cross-Reference */}
+                        <div className="flex gap-4 relative">
+                          <div className="h-6.5 w-6.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center z-10 shrink-0 text-emerald-400">
+                            <CheckCircle className="h-4.5 w-4.5 text-emerald-400" />
+                          </div>
+                          <div className="space-y-1">
+                            <h5 className="font-bold text-xs text-slate-200 tracking-wide">Navigasi Multimodal</h5>
+                            <p className="text-xs text-slate-450 leading-relaxed max-w-2xl">
+                              Mengintegrasikan bobot probabilitas model klasifikasi visi dengan penalaran logika AI Pathologist menggunakan basis pengetahuan diagnosis padi.
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Step 4: OpenAI CoT Reasoning */}
+                        <div className="flex gap-4 relative">
+                          <div className="h-6.5 w-6.5 rounded-full bg-emerald-500 border border-emerald-400 flex items-center justify-center z-10 shrink-0 text-slate-950">
+                            <Cpu className="h-3.5 w-3.5 text-slate-950 font-bold" />
+                          </div>
+                          <div className="space-y-2 flex-1">
+                            <h5 className="font-bold text-xs text-emerald-400 tracking-wide">Diagnostic Finalization & Chain-of-Thought</h5>
+                            
+                            <div className="bg-slate-950/60 p-4 rounded-2xl border border-slate-800/80 max-w-4xl">
+                              <p className="text-xs text-slate-350 leading-relaxed font-mono whitespace-pre-line select-text">
+                                {result.thinking}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                      </div>
+                    </div>
+                  )}
+
+                </div>
+              )}
+            </>
           )}
 
         </div>
