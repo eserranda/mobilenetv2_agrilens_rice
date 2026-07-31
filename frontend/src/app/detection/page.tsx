@@ -2,12 +2,12 @@
 
 import React, { useState, useEffect, useRef, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { 
-  Upload, 
-  Loader2, 
-  Leaf, 
-  AlertTriangle, 
-  CheckCircle, 
+import {
+  Upload,
+  Loader2,
+  Leaf,
+  AlertTriangle,
+  CheckCircle,
   RefreshCw,
   Settings,
   User,
@@ -22,21 +22,34 @@ import {
   Trash2,
   Play
 } from "lucide-react";
-import { 
-  detectDisease, 
-  getHistoryDetail, 
-  DetectionResponse, 
-  HistoryDetail 
+import {
+  detectDisease,
+  getHistoryDetail,
+  getSetting,
+  updateSetting,
+  DetectionResponse,
+  HistoryDetail
 } from "@/lib/api";
 import { cn } from "@/lib/utils";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import Header from "@/components/Header";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 const SCIENTIFIC_NAMES: Record<string, string> = {
-  "Bacterial blight": "Xanthomonas oryzae pv. oryzae",
+  "Bacterial_Blight": "Xanthomonas oryzae pv. oryzae",
   "Blast": "Magnaporthe oryzae",
-  "Brown Spot": "Cochliobolus miyabeanus",
-  "Tungro": "Rice Tungro Bacilliform Virus & Rice Tungro Spherical Virus",
+  "Brown_Spot": "Cochliobolus miyabeanus",
   "Healthy": "Oryza sativa (Sehat)",
 };
 
@@ -191,7 +204,7 @@ function DetectionContent() {
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
       {/* ============================================== HEADER SECTION */}
-      <header className="h-16 border-b border-slate-900 px-6 flex items-center justify-between shrink-0 bg-slate-950/50 z-10">
+      <Header>
         <div className="flex items-center gap-6">
           <button
             onClick={() => setActiveTab("result")}
@@ -205,7 +218,7 @@ function DetectionContent() {
               <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-400" />
             )}
           </button>
-          <button
+          {/* <button
             onClick={() => setActiveTab("analysis")}
             className={cn(
               "h-16 text-sm font-bold tracking-wide relative flex items-center transition",
@@ -216,32 +229,16 @@ function DetectionContent() {
             {activeTab === "analysis" && (
               <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-400" />
             )}
-          </button>
+          </button> */}
         </div>
-
-        <div className="flex items-center gap-4">
-          <button 
-            onClick={resetAll} 
-            className="text-slate-400 hover:text-white transition p-1.5 hover:bg-slate-900 rounded-lg"
-            title="Reset Scan"
-          >
-            <RefreshCw className="h-5 w-5" />
-          </button>
-          <button className="text-slate-400 hover:text-white transition p-1.5 hover:bg-slate-900 rounded-lg">
-            <Settings className="h-5 w-5" />
-          </button>
-          <div className="h-8 w-8 rounded-full bg-slate-800 border border-slate-700 overflow-hidden flex items-center justify-center">
-            <User className="h-4.5 w-4.5 text-slate-400" />
-          </div>
-        </div>
-      </header>
+      </Header>
 
       {/* ============================================== CONTENT CONTAINER */}
       <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900">
         <div className="max-w-6xl mx-auto space-y-6">
 
           {/* Error Banner */}
-          {error && (
+          {error && !(previewUrl && !result) && (
             <div className="p-4 bg-rose-500/15 border border-rose-500/30 rounded-2xl flex items-start gap-3">
               <AlertTriangle className="h-5 w-5 text-rose-400 shrink-0 mt-0.5" />
               <div>
@@ -280,11 +277,11 @@ function DetectionContent() {
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                   <div className="lg:col-span-12">
                     {/* Desktop Upload Area */}
-                    <div 
+                    <div
                       className={cn(
                         "hidden md:flex border-2 border-dashed rounded-3xl p-12 transition duration-300 flex-col items-center justify-center min-h-[350px] relative overflow-hidden cursor-pointer",
-                        dragActive 
-                          ? "border-emerald-500 bg-emerald-500/5 shadow-lg shadow-emerald-500/5" 
+                        dragActive
+                          ? "border-emerald-500 bg-emerald-500/5 shadow-lg shadow-emerald-500/5"
                           : "bg-slate-950/20 border-slate-800 hover:border-slate-700"
                       )}
                     >
@@ -339,7 +336,7 @@ function DetectionContent() {
               {/* STATE B: PREVIEW STATE (Selected file but not yet analyzed) */}
               {previewUrl && !result && (
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start animate-fade-in">
-                  
+
                   {/* Left Column: Image with two action buttons */}
                   <div className="md:col-span-5 space-y-4">
                     <div className="border border-slate-800/80 bg-slate-950/40 rounded-3xl p-4 relative backdrop-blur-md">
@@ -349,21 +346,32 @@ function DetectionContent() {
                           alt="Rice leaf preview"
                           className="h-full w-full object-contain"
                         />
-                        <span className="absolute top-3 left-3 bg-amber-500/80 backdrop-blur-md text-white text-[10px] font-bold tracking-wider px-2.5 py-1 rounded-full uppercase border border-amber-400/25">
-                          Ready for analysis
+                        <span className={cn(
+                          "absolute top-3 left-3 backdrop-blur-md text-white text-[10px] font-bold tracking-wider px-2.5 py-1 rounded-full uppercase border",
+                          error
+                            ? "bg-rose-500/80 border-rose-400/25"
+                            : "bg-amber-500/80 border-amber-400/25"
+                        )}>
+                          {error ? "Subject Invalid" : "Ready for analysis"}
                         </span>
                       </div>
 
                       {/* Action buttons: Analisis and Hapus/Batal */}
                       <div className="grid grid-cols-2 gap-3 mt-4">
-                        <button 
+                        <button
                           onClick={handleSubmit}
-                          className="py-2.5 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition shadow-lg shadow-emerald-600/10"
+                          disabled={!!error}
+                          className={cn(
+                            "py-2.5 text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition shadow-lg",
+                            error
+                              ? "bg-slate-850 text-slate-500 cursor-not-allowed border border-slate-800"
+                              : "bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 shadow-emerald-600/10"
+                          )}
                         >
                           <Play className="h-4 w-4 shrink-0 fill-current" />
                           Analisis Gambar
                         </button>
-                        <button 
+                        <button
                           onClick={resetAll}
                           className="py-2.5 bg-slate-900 hover:bg-slate-855 text-rose-400 hover:text-rose-300 border border-slate-800 hover:border-slate-700 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition"
                         >
@@ -374,20 +382,40 @@ function DetectionContent() {
                     </div>
                   </div>
 
-                  {/* Right Column: Information Guidance box */}
+                  {/* Right Column: Information Guidance or Error Warning box */}
                   <div className="md:col-span-7">
-                    <div className="border border-slate-850/80 bg-slate-950/40 rounded-3xl p-8 backdrop-blur-md relative flex flex-col items-center justify-center text-center min-h-[350px]">
-                      <div className="h-16 w-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-6 animate-pulse">
-                        <Cpu className="h-8 w-8" />
+                    {error ? (
+                      /* Warning / Error box if image is not a rice plant */
+                      <div className="border border-rose-500/35 bg-rose-950/15 rounded-3xl p-8 backdrop-blur-md relative flex flex-col items-center justify-center text-center min-h-[350px]">
+                        <div className="h-16 w-16 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-450 mb-6 animate-bounce">
+                          <AlertTriangle className="h-8 w-8" />
+                        </div>
+                        <h3 className="text-xl font-extrabold text-rose-400 tracking-wide">Analisis Ditolak</h3>
+                        <p className="text-xs text-rose-300/90 max-w-md mt-4 leading-relaxed bg-rose-500/10 p-4 rounded-2xl border border-rose-500/15">
+                          {error}
+                        </p>
+                        <p className="text-xs text-slate-400 max-w-sm mt-4 leading-relaxed">
+                          Sistem membatalkan proses inferensi MobileNetV2 karena gambar yang diunggah tidak terdeteksi sebagai tanaman padi yang valid.
+                        </p>
+                        <p className="text-xs text-emerald-400 font-semibold mt-6 leading-relaxed bg-slate-900/40 px-4 py-2 rounded-xl border border-slate-800">
+                          Tekan tombol <span className="underline">Hapus / Reset</span> di bawah foto untuk mencoba gambar lain.
+                        </p>
                       </div>
-                      <h3 className="text-xl font-extrabold text-white tracking-wide">Daun Padi Siap Dianalisis</h3>
-                      <p className="text-xs text-slate-400 max-w-sm mt-3 leading-relaxed">
-                        Gambar berhasil dimuat ke memori lokal. Kecerdasan Buatan AgriLens Pro siap mengekstrak ciri visual dan mendiagnosis patologi tanaman padi secara presisi.
-                      </p>
-                      <p className="text-xs text-emerald-500 font-bold mt-5 leading-relaxed bg-emerald-500/5 px-4 py-2 rounded-xl border border-emerald-500/10">
-                        Silakan tekan tombol <span className="underline">Analisis Gambar</span> di bawah foto untuk memulai diagnosis AI.
-                      </p>
-                    </div>
+                    ) : (
+                      /* Standard Ready box */
+                      <div className="border border-slate-850/80 bg-slate-950/40 rounded-3xl p-8 backdrop-blur-md relative flex flex-col items-center justify-center text-center min-h-[350px]">
+                        <div className="h-16 w-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-6 animate-pulse">
+                          <Cpu className="h-8 w-8" />
+                        </div>
+                        <h3 className="text-xl font-extrabold text-white tracking-wide">Daun Padi Siap Dianalisis</h3>
+                        <p className="text-xs text-slate-400 max-w-sm mt-3 leading-relaxed">
+                          Gambar berhasil dimuat ke memori lokal. Kecerdasan Buatan AgriLens Pro siap mengekstrak ciri visual dan mendiagnosis patologi tanaman padi secara presisi.
+                        </p>
+                        <p className="text-xs text-emerald-500 font-bold mt-5 leading-relaxed bg-emerald-500/5 px-4 py-2 rounded-xl border border-emerald-500/10">
+                          Silakan tekan tombol <span className="underline">Analisis Gambar</span> di bawah foto untuk memulai diagnosis AI.
+                        </p>
+                      </div>
+                    )}
                   </div>
 
                 </div>
@@ -396,10 +424,10 @@ function DetectionContent() {
               {/* STATE C: RESULT VIEW (Analysis results rendered) */}
               {result && (
                 <div className="space-y-6">
-                  
+
                   {/* TOP ROW: Leaf Image & Disease Card */}
                   <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
-                    
+
                     {/* 1. Image Preview Panel */}
                     <div className="md:col-span-5 space-y-4">
                       <div className="border border-slate-800/80 bg-slate-950/40 rounded-3xl p-4 relative backdrop-blur-md">
@@ -409,7 +437,7 @@ function DetectionContent() {
                             alt={result.disease}
                             className="h-full w-full object-contain"
                           />
-                          
+
                           {/* AI Verified badge overlay */}
                           <span className="absolute top-3 left-3 bg-emerald-500/80 backdrop-blur-md text-white text-[10px] font-bold tracking-wider px-2.5 py-1 rounded-full uppercase border border-emerald-400/25">
                             AI Verified
@@ -418,14 +446,14 @@ function DetectionContent() {
 
                         {/* Scan actions below image */}
                         <div className="grid grid-cols-2 gap-3 mt-4">
-                          <button 
+                          <button
                             onClick={triggerFileInput}
                             className="py-2.5 bg-emerald-800 hover:bg-emerald-700 active:bg-emerald-900 text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition"
                           >
                             <Camera className="h-4 w-4" />
                             Scan New
                           </button>
-                          <button 
+                          <button
                             onClick={triggerFileInput}
                             className="py-2.5 bg-slate-900 hover:bg-slate-855 text-emerald-400 hover:text-emerald-300 border border-slate-800 hover:border-slate-700 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition"
                           >
@@ -438,12 +466,12 @@ function DetectionContent() {
 
                     {/* 2. Disease details card */}
                     <div className="md:col-span-7 space-y-6">
-                      
+
                       {/* Title and Matching bar */}
                       <div className="border border-slate-800/80 bg-slate-950/40 rounded-3xl p-6 backdrop-blur-md relative">
                         <div className="flex flex-wrap items-start justify-between gap-4">
                           <div>
-                            <h2 className="text-2xl font-extrabold text-white">{result.disease}</h2>
+                            <h2 className="text-2xl font-extrabold text-white">{result.disease.replace(/_/g, " ")}</h2>
                             <p className="text-xs text-slate-400 italic mt-1.5 font-medium">
                               {SCIENTIFIC_NAMES[result.disease] || "Oryza sativa pathogens"}
                             </p>
@@ -470,7 +498,7 @@ function DetectionContent() {
                             <span className="text-emerald-400">{Math.round(result.confidence * 100)}%</span>
                           </div>
                           <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
-                            <div 
+                            <div
                               className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-1000 ease-out"
                               style={{ width: `${result.confidence * 100}%` }}
                             />
@@ -483,14 +511,14 @@ function DetectionContent() {
 
                       {/* Two columns details: Symptoms observed & Recommended actions */}
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        
+
                         {/* Symptoms observed Card */}
                         <div className="border border-slate-800/80 bg-slate-950/40 rounded-3xl p-5 backdrop-blur-md">
                           <div className="flex items-center gap-2 mb-4 border-b border-slate-800/60 pb-3">
                             <Eye className="h-5 w-5 text-emerald-400" />
-                            <h4 className="font-bold text-sm text-slate-200">Symptoms Observed</h4>
+                            <h4 className="font-bold text-sm text-slate-200">Gejala Teramati</h4>
                           </div>
-                          
+
                           {result.explanation ? (
                             <ul className="space-y-3">
                               {formatBulletPoints(result.explanation).map((pt, i) => (
@@ -509,7 +537,7 @@ function DetectionContent() {
                         <div className="border border-slate-800/80 bg-slate-950/40 rounded-3xl p-5 backdrop-blur-md">
                           <div className="flex items-center gap-2 mb-4 border-b border-slate-800/60 pb-3">
                             <ClipboardList className="h-5 w-5 text-emerald-400" />
-                            <h4 className="font-bold text-sm text-slate-200">Recommended Actions</h4>
+                            <h4 className="font-bold text-sm text-slate-200">Rekomendasi Tindakan</h4>
                           </div>
 
                           {result.recommendation ? (
@@ -537,16 +565,16 @@ function DetectionContent() {
                   {/* BOTTOM ROW: Timeline AI Diagnostic Reasoning (CoT) */}
                   {result.thinking && (
                     <div className="border border-slate-800/85 bg-slate-950/40 rounded-3xl p-6 backdrop-blur-md space-y-6">
-                      
+
                       {/* Section Title */}
                       <div className="flex items-center gap-2 border-b border-slate-800/80 pb-4">
                         <Activity className="h-5 w-5 text-emerald-400" />
-                        <h3 className="font-bold text-base text-white">AI Diagnostic Reasoning</h3>
+                        <h3 className="font-bold text-base text-white">Analisa Diagnostik</h3>
                       </div>
 
                       {/* Custom Timeline steps */}
                       <div className="space-y-6 relative before:absolute before:left-3 before:top-2 before:bottom-2 before:w-[1px] before:bg-slate-800">
-                        
+
                         {/* Step 1: Pre-processing */}
                         <div className="flex gap-4 relative">
                           <div className="h-6.5 w-6.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center z-10 shrink-0 text-emerald-400">
@@ -593,7 +621,7 @@ function DetectionContent() {
                           </div>
                           <div className="space-y-2 flex-1">
                             <h5 className="font-bold text-xs text-emerald-400 tracking-wide">Diagnostic Finalization & Chain-of-Thought</h5>
-                            
+
                             <div className="bg-slate-950/60 p-4 rounded-2xl border border-slate-800/80 max-w-4xl">
                               <p className="text-xs text-slate-350 leading-relaxed font-mono whitespace-pre-line select-text">
                                 {result.thinking}

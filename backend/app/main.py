@@ -20,7 +20,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from app.api.v1.router import router as v1_router
+from app.api.router import router as api_router
 from app.config import settings
 from app.core.vision.loader import ModelLoader
 from app.core.vision.predictor import DiseasePredictor
@@ -63,6 +63,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     from app.db.base import Base
     from app.db.session import engine
     from app.models.history import DetectionHistory  # Register models without shadowing app parameter
+    from app.models.setting import AppSetting
     import os
 
     # Ensure database directory exists for SQLite
@@ -163,7 +164,7 @@ def create_application() -> FastAPI:
         )
 
     # ---- API Router ----------------------------------------------------
-    app.include_router(v1_router, prefix="/api/v1")
+    app.include_router(api_router, prefix="/api/v1")
 
     # ---- Static Files Mounting -----------------------------------------
     from fastapi.staticfiles import StaticFiles

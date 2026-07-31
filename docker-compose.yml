@@ -3,7 +3,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: rice_disease_api
+    container_name: agriLens-api
     ports:
       - "8000:8000"
     # Membaca konfigurasi environment variables (seperti OPENAI_API_KEY) secara otomatis dari file .env
@@ -20,7 +20,7 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: rice_disease_frontend
+    container_name: agriLens-web
     ports:
       - "3000:3000"
     command: npm run dev

@@ -2,10 +2,10 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { 
-  History, 
-  Trash2, 
-  Loader2, 
+import {
+  History,
+  Trash2,
+  Loader2,
   ChevronRight,
   Download,
   Search,
@@ -17,12 +17,13 @@ import {
   AlertTriangle,
   User
 } from "lucide-react";
-import { 
-  getHistory, 
-  deleteHistory, 
-  HistoryItem 
+import {
+  getHistory,
+  deleteHistory,
+  HistoryItem
 } from "@/lib/api";
 import { cn } from "@/lib/utils";
+import Header from "@/components/Header";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -39,7 +40,7 @@ export default function HistoryPage() {
   const [dateFilter, setDateFilter] = useState<string>("");
   const [activeCategory, setActiveCategory] = useState<string>("Semua");
 
-  const categories = ["Semua", "Bacterial blight", "Blast", "Brown Spot", "Tungro", "Healthy"];
+  const categories = ["Semua", "Bacterial_Blight", "Blast", "Brown_Spot", "Healthy"];
 
   const loadHistory = async (page: number = 1) => {
     setIsLoading(true);
@@ -90,13 +91,13 @@ export default function HistoryPage() {
       item.severity || "N/A",
       new Date(item.created_at).toISOString()
     ]);
-    
-    const csvContent = "data:text/csv;charset=utf-8," 
+
+    const csvContent = "data:text/csv;charset=utf-8,"
       + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `agrilens_history_export_${Date.now()}.csv`);
+    link.setAttribute("download", "riwayat_deteksi_agrilens.csv");
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -106,7 +107,7 @@ export default function HistoryPage() {
   const filteredItems = historyItems.filter((item) => {
     // 1. Search Query
     const query = searchQuery.toLowerCase();
-    const matchesSearch = 
+    const matchesSearch =
       item.disease.toLowerCase().includes(query) ||
       (item.severity && item.severity.toLowerCase().includes(query));
 
@@ -114,23 +115,24 @@ export default function HistoryPage() {
     const matchesDate = !dateFilter || item.created_at.startsWith(dateFilter);
 
     // 3. Category Pill
-    const matchesCategory = 
-      activeCategory === "Semua" || 
+    const matchesCategory =
+      activeCategory === "Semua" ||
       item.disease.toLowerCase() === activeCategory.toLowerCase();
 
     return matchesSearch && matchesDate && matchesCategory;
   });
 
   const getBadgeStyles = (disease: string) => {
-    const d = disease.toLowerCase();
+    const d = disease.toLowerCase().replace(/_/g, " ");
     if (d === "healthy") return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
     if (d === "bacterial blight") return "bg-rose-500/10 text-rose-400 border-rose-500/20";
     return "bg-amber-500/10 text-amber-400 border-amber-500/20";
   };
 
   const getPillLabel = (disease: string) => {
-    if (disease.toLowerCase() === "healthy") return "Sehat";
-    return disease;
+    const d = disease.replace(/_/g, " ");
+    if (d.toLowerCase() === "healthy") return "Sehat";
+    return d;
   };
 
   // Pagination calculation
@@ -140,27 +142,7 @@ export default function HistoryPage() {
   return (
     <div className="flex-1 flex flex-col overflow-hidden h-full min-h-0">
       {/* ============================================== TOP BAR / FILTER ACTIONS */}
-      <header className="h-16 border-b border-slate-900 px-6 flex items-center justify-between shrink-0 bg-slate-950/50">
-        <div className="flex-1 max-w-md relative hidden md:block">
-          <Search className="absolute left-3 top-2.5 h-4.5 w-4.5 text-slate-500" />
-          <input
-            type="text"
-            placeholder="Global search..."
-            className="w-full pl-10 pr-4 py-2 text-xs bg-slate-900 border border-slate-800 rounded-xl focus:border-emerald-500 focus:outline-none transition"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
-
-        <div className="flex items-center gap-4 ml-auto">
-          <button className="text-slate-400 hover:text-white transition">
-            <SlidersHorizontal className="h-4.5 w-4.5" />
-          </button>
-          <div className="h-8 w-8 rounded-full bg-slate-850 border border-slate-850 overflow-hidden flex items-center justify-center">
-            <User className="h-4.5 w-4.5 text-slate-400" />
-          </div>
-        </div>
-      </header>
+      <Header />
 
       {/* ============================================== SCROLLABLE LIST AREA */}
       <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900">
@@ -172,7 +154,7 @@ export default function HistoryPage() {
               <h2 className="text-2xl font-extrabold text-white tracking-wide">Riwayat Deteksi</h2>
               <p className="text-xs text-slate-400 mt-1">Review and manage your previous plant diagnostic results.</p>
             </div>
-            
+
             <button
               onClick={handleExportCSV}
               className="px-4 py-2.5 bg-slate-900 hover:bg-slate-850 border border-slate-800 text-xs font-bold rounded-xl flex items-center gap-2 transition"
@@ -185,7 +167,7 @@ export default function HistoryPage() {
           {/* Filter Bar Controls */}
           <div className="bg-slate-950/40 p-4 rounded-3xl border border-slate-850/60 space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-4">
-              
+
               {/* Search Field */}
               <div className="lg:col-span-8 relative">
                 <Search className="absolute left-3 top-3 h-4.5 w-4.5 text-slate-500" />
@@ -256,7 +238,7 @@ export default function HistoryPage() {
             /* Card Grid */
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredItems.map((item) => (
-                <div 
+                <div
                   key={item.id}
                   className="group bg-slate-950/40 border border-slate-850/80 rounded-3xl overflow-hidden hover:border-slate-750 transition duration-300 flex flex-col relative"
                 >
@@ -268,7 +250,7 @@ export default function HistoryPage() {
                       className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
                       loading="lazy"
                     />
-                    
+
                     {/* Floating label badge */}
                     <span className={cn(
                       "absolute top-3 left-3 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border backdrop-blur-md",
@@ -292,13 +274,13 @@ export default function HistoryPage() {
                     <div className="flex items-start justify-between gap-2">
                       <div>
                         <h4 className="font-bold text-base text-slate-100 group-hover:text-white transition duration-200 truncate">
-                          {item.disease}
+                          {item.disease.replace(/_/g, " ")}
                         </h4>
                         <p className="text-[10px] text-slate-500 mt-1 font-medium">
                           Detected: {new Date(item.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
                         </p>
                       </div>
-                      
+
                       <CheckCircle className="h-5 w-5 text-emerald-500 mt-0.5 shrink-0" />
                     </div>
 
@@ -309,7 +291,7 @@ export default function HistoryPage() {
                         <span className="text-emerald-400 font-bold">{Math.round(item.confidence * 100)}%</span>
                       </div>
                       <div className="h-1.5 w-full bg-slate-900 rounded-full overflow-hidden">
-                        <div 
+                        <div
                           className="h-full bg-emerald-500"
                           style={{ width: `${item.confidence * 100}%` }}
                         />
@@ -317,7 +299,7 @@ export default function HistoryPage() {
                     </div>
 
                     {/* Link button to Detection result page */}
-                    <Link 
+                    <Link
                       href={`/detection?id=${item.id}`}
                       className="w-full flex items-center justify-center gap-1.5 py-2.5 border border-slate-800 hover:border-slate-700 hover:bg-slate-900 rounded-xl text-xs font-bold text-emerald-400 hover:text-emerald-300 transition mt-6"
                     >
@@ -351,7 +333,7 @@ export default function HistoryPage() {
                 >
                   &lt;
                 </button>
-                
+
                 {paginationRange.map((pgNum) => (
                   <button
                     key={pgNum}

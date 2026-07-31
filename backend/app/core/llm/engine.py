@@ -91,6 +91,67 @@ class LLMEngine:
                 f"LLM returned invalid JSON: {exc}\nRaw response: {raw}"
             ) from exc
 
+    def validate_rice_plant_image(self, image_bytes: bytes) -> Dict[str, Any]:
+        """Validate if the provided image contains a rice plant using the Vision API.
+
+        Returns a dict: {"is_rice_plant": bool, "reason": str}
+        """
+        import base64
+
+        if not self._client:
+            logger.warning("OpenAI client not initialized. Skipping guardrail check.")
+            return {"is_rice_plant": True, "reason": "OpenAI not configured"}
+
+        base64_image = base64.b64encode(image_bytes).decode('utf-8')
+
+        prompt = (
+            "You are an expert agricultural pathology assistant.\n"
+            "Analyze the provided image and determine if it shows a rice plant (Oryza sativa) - "
+            "this includes a rice leaf, stalk, grain, field, crop, or nursery seedling.\n"
+            "Respond strictly in JSON format using this schema:\n"
+            "{\n"
+            "  \"is_rice_plant\": true or false,\n"
+            "  \"reason\": \"A brief explanation in Indonesian. If it is a rice plant, state what parts are visible. If it is not, state what is actually visible instead (e.g. 'Gambar ini adalah kucing' or 'Gambar ini adalah wajah manusia').\"\n"
+            "}"
+        )
+
+        try:
+            logger.info("Sending image to LLM for guardrail validation check...")
+            response = self._client.chat.completions.create(
+                model=self._model,
+                messages=[
+                    {
+                        "role": "user",
+                        "content": [
+                            {"type": "text", "text": prompt},
+                            {
+                                "type": "image_url",
+                                "image_url": {
+                                    "url": f"data:image/jpeg;base64,{base64_image}"
+                                }
+                            }
+                        ]
+                    }
+                ],
+                response_format={"type": "json_object"},
+                temperature=0.0,
+            )
+
+            content = response.choices[0].message.content
+            if not content:
+                raise ValueError("Empty response from LLM")
+
+            res = json.loads(content)
+            logger.info("Guardrail check result: %s", str(res))
+            return {
+                "is_rice_plant": bool(res.get("is_rice_plant", True)),
+                "reason": str(res.get("reason", ""))
+            }
+        except Exception as exc:
+            logger.error("Failed to perform image guardrail validation check: %s", str(exc))
+            # Fail-open: do not block prediction if API has an error
+            return {"is_rice_plant": True, "reason": "Guardrail check failed to execute"}
+
     # ------------------------------------------------------------------
     # Private Helpers
     # ------------------------------------------------------------------
