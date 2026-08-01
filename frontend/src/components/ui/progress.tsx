@@ -14,7 +14,12 @@ function Progress({
     <ProgressPrimitive.Root
       value={value}
       data-slot="progress"
-      className={cn("flex flex-wrap gap-3", className)}
+      className={(state) =>
+        cn(
+          "flex flex-wrap gap-3",
+          typeof className === "function" ? className(state) : className
+        )
+      }
       {...props}
     >
       {children}
@@ -28,10 +33,12 @@ function Progress({
 function ProgressTrack({ className, ...props }: ProgressPrimitive.Track.Props) {
   return (
     <ProgressPrimitive.Track
-      className={cn(
-        "relative flex h-1 w-full items-center overflow-x-hidden rounded-full bg-muted",
-        className
-      )}
+      className={(state) =>
+        cn(
+          "relative flex h-1 w-full items-center overflow-x-hidden rounded-full bg-muted",
+          typeof className === "function" ? className(state) : className
+        )
+      }
       data-slot="progress-track"
       {...props}
     />
@@ -45,7 +52,12 @@ function ProgressIndicator({
   return (
     <ProgressPrimitive.Indicator
       data-slot="progress-indicator"
-      className={cn("h-full bg-primary transition-all", className)}
+      className={(state) =>
+        cn(
+          "h-full bg-primary transition-all",
+          typeof className === "function" ? className(state) : className
+        )
+      }
       {...props}
     />
   )
@@ -54,7 +66,12 @@ function ProgressIndicator({
 function ProgressLabel({ className, ...props }: ProgressPrimitive.Label.Props) {
   return (
     <ProgressPrimitive.Label
-      className={cn("text-sm font-medium", className)}
+      className={(state) =>
+        cn(
+          "text-sm font-medium",
+          typeof className === "function" ? className(state) : className
+        )
+      }
       data-slot="progress-label"
       {...props}
     />
@@ -64,10 +81,12 @@ function ProgressLabel({ className, ...props }: ProgressPrimitive.Label.Props) {
 function ProgressValue({ className, ...props }: ProgressPrimitive.Value.Props) {
   return (
     <ProgressPrimitive.Value
-      className={cn(
-        "ml-auto text-sm text-muted-foreground tabular-nums",
-        className
-      )}
+      className={(state) =>
+        cn(
+          "ml-auto text-sm text-muted-foreground tabular-nums",
+          typeof className === "function" ? className(state) : className
+        )
+      }
       data-slot="progress-value"
       {...props}
     />
