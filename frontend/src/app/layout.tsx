@@ -164,14 +164,14 @@ export default function RootLayout({
                 <DialogContent className="sm:max-w-md bg-slate-900 border border-slate-800 text-white rounded-3xl p-6">
                   <DialogHeader>
                     <DialogTitle className="text-lg font-bold text-slate-200">Pengaturan Analisis</DialogTitle>
-                    <DialogDescription className="text-xs text-slate-450 mt-1">
+                    <DialogDescription className="text-xs text-slate-400 mt-1">
                       Konfigurasi bagaimana model AgriLens Pro memproses dan memvalidasi gambar.
                     </DialogDescription>
                   </DialogHeader>
 
                   {/* Switch Toggle for OpenAI Verification */}
                   <div className="my-6">
-                    <div className="flex items-center justify-between p-4 border rounded-2xl bg-slate-950/20 border-slate-850 hover:border-slate-800 transition duration-300">
+                    <div className="flex items-center justify-between p-4 border rounded-2xl bg-slate-950/20 border-slate-800 hover:border-slate-800 transition duration-300">
                       <div className="flex flex-col pr-4">
                         <span className="text-xs font-bold text-slate-200">Verifikasi Gambar (OpenAI Vision Guardrail)</span>
                         <span className="text-[10px] text-slate-500 mt-1 leading-relaxed">
@@ -200,7 +200,7 @@ export default function RootLayout({
                     </div>
                   </div>
 
-                  <DialogFooter className="border-t border-slate-850/60 pt-4 flex gap-2">
+                  <DialogFooter className="border-t border-slate-800/60 pt-4 flex gap-2">
                     <DialogClose render={
                       <Button variant="outline" className="w-full py-2.5 bg-slate-950/40 border-slate-800 hover:bg-slate-900 rounded-xl text-xs text-slate-400 font-bold hover:text-white transition">
                         Tutup

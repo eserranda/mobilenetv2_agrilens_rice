@@ -260,10 +260,10 @@ function DetectionContent() {
           {/* 1. Loading screen takes absolute priority */}
           {isLoading && (
             /* Analysis Loading Screen */
-            <div className="border border-slate-850/80 bg-slate-950/40 rounded-3xl p-12 text-center flex flex-col items-center justify-center min-h-[400px]">
+            <div className="border border-slate-800/80 bg-slate-950/40 rounded-3xl p-12 text-center flex flex-col items-center justify-center min-h-[400px]">
               <Loader2 className="h-12 w-12 text-emerald-400 animate-spin mb-4" />
               <h3 className="font-bold text-slate-200 text-lg">Menganalisis Kesehatan Daun Padi...</h3>
-              <p className="text-xs text-slate-550 max-w-sm mt-1.5 leading-relaxed">
+              <p className="text-xs text-slate-500 max-w-sm mt-1.5 leading-relaxed">
                 Sistem sedang mengidentifikasi karakteristik visual pada daun menggunakan MobileNetV2 dan merumuskan diagnosis menggunakan AI Pathologist.
               </p>
             </div>
@@ -295,11 +295,11 @@ function DetectionContent() {
                         accept="image/*"
                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                       />
-                      <div className="h-16 w-16 rounded-2xl bg-slate-850 border border-slate-800 flex items-center justify-center text-emerald-400 mb-4 hover:scale-105 transition duration-300">
+                      <div className="h-16 w-16 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center text-emerald-400 mb-4 hover:scale-105 transition duration-300">
                         <Upload className="h-6 w-6" />
                       </div>
                       <h3 className="font-bold text-slate-200 text-lg">Unggah Gambar Daun Padi</h3>
-                      <p className="text-xs text-slate-550 max-w-xs mt-1 text-center">
+                      <p className="text-xs text-slate-500 max-w-xs mt-1 text-center">
                         Seret & lepas foto di sini, atau klik untuk memilih file dari komputer Anda (JPG, PNG, WebP)
                       </p>
                     </div>
@@ -364,7 +364,7 @@ function DetectionContent() {
                           className={cn(
                             "py-2.5 text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition shadow-lg",
                             error
-                              ? "bg-slate-850 text-slate-500 cursor-not-allowed border border-slate-800"
+                              ? "bg-slate-900 text-slate-500 cursor-not-allowed border border-slate-800"
                               : "bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 shadow-emerald-600/10"
                           )}
                         >
@@ -373,7 +373,7 @@ function DetectionContent() {
                         </button>
                         <button
                           onClick={resetAll}
-                          className="py-2.5 bg-slate-900 hover:bg-slate-855 text-rose-400 hover:text-rose-300 border border-slate-800 hover:border-slate-700 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition"
+                          className="py-2.5 bg-slate-900 hover:bg-slate-800 text-rose-400 hover:text-rose-300 border border-slate-800 hover:border-slate-700 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition"
                         >
                           <Trash2 className="h-4 w-4 shrink-0" />
                           Hapus / Reset
@@ -387,7 +387,7 @@ function DetectionContent() {
                     {error ? (
                       /* Warning / Error box if image is not a rice plant */
                       <div className="border border-rose-500/35 bg-rose-950/15 rounded-3xl p-8 backdrop-blur-md relative flex flex-col items-center justify-center text-center min-h-[350px]">
-                        <div className="h-16 w-16 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-450 mb-6 animate-bounce">
+                        <div className="h-16 w-16 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400 mb-6 animate-bounce">
                           <AlertTriangle className="h-8 w-8" />
                         </div>
                         <h3 className="text-xl font-extrabold text-rose-400 tracking-wide">Analisis Ditolak</h3>
@@ -403,7 +403,7 @@ function DetectionContent() {
                       </div>
                     ) : (
                       /* Standard Ready box */
-                      <div className="border border-slate-850/80 bg-slate-950/40 rounded-3xl p-8 backdrop-blur-md relative flex flex-col items-center justify-center text-center min-h-[350px]">
+                      <div className="border border-slate-800/80 bg-slate-950/40 rounded-3xl p-8 backdrop-blur-md relative flex flex-col items-center justify-center text-center min-h-[350px]">
                         <div className="h-16 w-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-6 animate-pulse">
                           <Cpu className="h-8 w-8" />
                         </div>
@@ -529,7 +529,7 @@ function DetectionContent() {
                               ))}
                             </ul>
                           ) : (
-                            <p className="text-xs text-slate-550 italic">Tidak ada deskripsi gejala teramati.</p>
+                            <p className="text-xs text-slate-450 italic">Tidak ada deskripsi gejala teramati.</p>
                           )}
                         </div>
 
@@ -543,7 +543,7 @@ function DetectionContent() {
                           {result.recommendation ? (
                             <ul className="space-y-3">
                               {formatBulletPoints(result.recommendation).map((pt, i) => (
-                                <li key={i} className="text-xs text-slate-350 leading-relaxed flex items-start gap-3 bg-slate-900/30 p-2.5 rounded-xl border border-slate-800/30">
+                                <li key={i} className="text-xs text-slate-300 leading-relaxed flex items-start gap-3 bg-slate-900/30 p-2.5 rounded-xl border border-slate-800/30">
                                   <div className="h-7 w-7 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0 mt-0.5">
                                     {getRecommendationIcon(i)}
                                   </div>
@@ -552,7 +552,7 @@ function DetectionContent() {
                               ))}
                             </ul>
                           ) : (
-                            <p className="text-xs text-slate-550 italic">Tidak ada rekomendasi penanganan.</p>
+                            <p className="text-xs text-slate-450 italic">Tidak ada rekomendasi penanganan.</p>
                           )}
                         </div>
 
@@ -582,7 +582,7 @@ function DetectionContent() {
                           </div>
                           <div className="space-y-1">
                             <h5 className="font-bold text-xs text-slate-200 tracking-wide">Image Pre-processing Complete</h5>
-                            <p className="text-xs text-slate-450 leading-relaxed max-w-2xl">
+                            <p className="text-xs text-slate-400 leading-relaxed max-w-2xl">
                               Normalisasi dan scaling citra diaplikasikan. Matriks input [{("metadata" in result && result.metadata && result.metadata.input_size) ? result.metadata.input_size.join("x") : "224x224"}] disiapkan untuk pemetaan fitur MobileNetV2.
                             </p>
                           </div>
@@ -595,7 +595,7 @@ function DetectionContent() {
                           </div>
                           <div className="space-y-1">
                             <h5 className="font-bold text-xs text-slate-200 tracking-wide">Feature Extraction</h5>
-                            <p className="text-xs text-slate-450 leading-relaxed max-w-2xl">
+                            <p className="text-xs text-slate-400 leading-relaxed max-w-2xl">
                               Model ekstraktor MobileNetV2 mengidentifikasi bentuk, gradien warna klorosis, dan kluster lesi nekrotik pada permukaan daun padi.
                             </p>
                           </div>
@@ -608,7 +608,7 @@ function DetectionContent() {
                           </div>
                           <div className="space-y-1">
                             <h5 className="font-bold text-xs text-slate-200 tracking-wide">Navigasi Multimodal</h5>
-                            <p className="text-xs text-slate-450 leading-relaxed max-w-2xl">
+                            <p className="text-xs text-slate-400 leading-relaxed max-w-2xl">
                               Mengintegrasikan bobot probabilitas model klasifikasi visi dengan penalaran logika AI Pathologist menggunakan basis pengetahuan diagnosis padi.
                             </p>
                           </div>
@@ -623,7 +623,7 @@ function DetectionContent() {
                             <h5 className="font-bold text-xs text-emerald-400 tracking-wide">Diagnostic Finalization & Chain-of-Thought</h5>
 
                             <div className="bg-slate-950/60 p-4 rounded-2xl border border-slate-800/80 max-w-4xl">
-                              <p className="text-xs text-slate-350 leading-relaxed font-mono whitespace-pre-line select-text">
+                              <p className="text-xs text-slate-300 leading-relaxed font-mono whitespace-pre-line select-text">
                                 {result.thinking}
                               </p>
                             </div>

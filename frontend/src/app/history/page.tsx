@@ -157,7 +157,7 @@ export default function HistoryPage() {
 
             <button
               onClick={handleExportCSV}
-              className="px-4 py-2.5 bg-slate-900 hover:bg-slate-850 border border-slate-800 text-xs font-bold rounded-xl flex items-center gap-2 transition"
+              className="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-xs font-bold rounded-xl flex items-center gap-2 transition"
             >
               <Download className="h-4 w-4" />
               Export Data
@@ -165,7 +165,7 @@ export default function HistoryPage() {
           </div>
 
           {/* Filter Bar Controls */}
-          <div className="bg-slate-950/40 p-4 rounded-3xl border border-slate-850/60 space-y-4">
+          <div className="bg-slate-950/40 p-4 rounded-3xl border border-slate-800/60 space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-4">
 
               {/* Search Field */}
@@ -197,7 +197,7 @@ export default function HistoryPage() {
             </div>
 
             {/* Category pills filter row */}
-            <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-850/40">
+            <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-800/40">
               {categories.map((cat) => (
                 <button
                   key={cat}
@@ -240,7 +240,7 @@ export default function HistoryPage() {
               {filteredItems.map((item) => (
                 <div
                   key={item.id}
-                  className="group bg-slate-950/40 border border-slate-850/80 rounded-3xl overflow-hidden hover:border-slate-750 transition duration-300 flex flex-col relative"
+                  className="group bg-slate-950/40 border border-slate-800/80 rounded-3xl overflow-hidden hover:border-slate-700 transition duration-300 flex flex-col relative"
                 >
                   {/* Image container */}
                   <div className="w-full aspect-[4/3] bg-slate-950 relative overflow-hidden">
@@ -314,12 +314,12 @@ export default function HistoryPage() {
 
           {/* ============================================== BOTTOM PAGINATION & FAB */}
           {!isLoading && filteredItems.length > 0 && (
-            <div className="pt-6 border-t border-slate-850/50 flex flex-wrap items-center justify-between gap-4">
+            <div className="pt-6 border-t border-slate-800/50 flex flex-wrap items-center justify-between gap-4">
               {/* Load More Button */}
               <button
                 onClick={() => loadHistory(currentPage + 1)}
                 disabled={historyItems.length < 12}
-                className="px-5 py-2.5 bg-slate-900 hover:bg-slate-850 border border-slate-800 text-xs font-bold rounded-xl text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-xs font-bold rounded-xl text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed transition"
               >
                 Load More History
               </button>
@@ -329,7 +329,7 @@ export default function HistoryPage() {
                 <button
                   onClick={() => loadHistory(currentPage > 1 ? currentPage - 1 : 1)}
                   disabled={currentPage <= 1}
-                  className="p-2 bg-slate-900 hover:bg-slate-850 border border-slate-800 rounded-xl text-xs disabled:opacity-40 transition"
+                  className="p-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-xl text-xs disabled:opacity-40 transition"
                 >
                   &lt;
                 </button>
@@ -342,7 +342,7 @@ export default function HistoryPage() {
                       "h-8 w-8 text-xs font-bold rounded-xl transition border",
                       currentPage === pgNum
                         ? "bg-emerald-600 border-emerald-500 text-white"
-                        : "bg-slate-900 hover:bg-slate-850 border-slate-800 text-slate-400"
+                        : "bg-slate-900 hover:bg-slate-800 border-slate-800 text-slate-400"
                     )}
                   >
                     {pgNum}
@@ -352,7 +352,7 @@ export default function HistoryPage() {
                 <button
                   onClick={() => loadHistory(currentPage + 1)}
                   disabled={historyItems.length < 12}
-                  className="p-2 bg-slate-900 hover:bg-slate-850 border border-slate-800 rounded-xl text-xs disabled:opacity-40 transition"
+                  className="p-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-xl text-xs disabled:opacity-40 transition"
                 >
                   &gt;
                 </button>
