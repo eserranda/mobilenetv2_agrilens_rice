@@ -9,10 +9,6 @@ ENV PYTHONUNBUFFERED=1 \
 # Set working directory di dalam container
 WORKDIR /app
 
-# Instal dependencies sistem yang diperlukan
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    && rm -rf /var/lib/apt/lists/*
 
 # Salin file requirements.txt terlebih dahulu untuk memanfaatkan Docker cache
 COPY requirements.txt .

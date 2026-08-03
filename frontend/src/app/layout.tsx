@@ -4,12 +4,12 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Geist, Geist_Mono } from "next/font/google";
-import { 
-  Leaf, 
-  History as HistoryIcon, 
-  User, 
-  Plus, 
-  Menu, 
+import {
+  Leaf,
+  History as HistoryIcon,
+  User,
+  Plus,
+  Menu,
   X,
   Compass,
   Settings
@@ -88,8 +88,8 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
       <body className="h-screen w-screen flex bg-slate-950 text-slate-100 font-sans overflow-hidden">
-        
-        {/* ============================================== DESKTOP SIDEBAR */}
+
+        {/* DESKTOP SIDEBAR */}
         <aside className="hidden md:flex w-72 bg-slate-950 border-r border-slate-905 flex-col shrink-0">
           {/* Header */}
           <div className="p-6 border-b border-slate-900">
@@ -115,8 +115,8 @@ export default function RootLayout({
                   href={item.href}
                   className={cn(
                     "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition duration-200 border border-transparent",
-                    isActive 
-                      ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20 shadow-sm shadow-emerald-500/5" 
+                    isActive
+                      ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20 shadow-sm shadow-emerald-500/5"
                       : "text-slate-400 hover:text-slate-200 hover:bg-slate-900/50"
                   )}
                 >
@@ -152,7 +152,7 @@ export default function RootLayout({
               </button>
               <h1 className="font-extrabold text-base text-white tracking-tight">AgriLens Pro</h1>
             </div>
-            
+
             <div className="flex items-center gap-2">
               {/* Settings Dialog (Mobile) */}
               <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
@@ -218,11 +218,11 @@ export default function RootLayout({
 
           {/* Mobile Drawer Overlay */}
           {isMobileMenuOpen && (
-            <div 
+            <div
               className="fixed inset-0 z-50 flex md:hidden bg-black/60 backdrop-blur-sm transition-opacity duration-300"
               onClick={() => setIsMobileMenuOpen(false)}
             >
-              <div 
+              <div
                 className="w-72 h-full bg-slate-950 border-r border-slate-900 flex flex-col animate-in slide-in-from-left duration-300"
                 onClick={(e) => e.stopPropagation()}
               >
@@ -232,7 +232,7 @@ export default function RootLayout({
                     <Compass className="h-5 w-5 text-emerald-400" />
                     <h1 className="font-extrabold text-base text-white">AgriLens Pro</h1>
                   </div>
-                  <button 
+                  <button
                     onClick={() => setIsMobileMenuOpen(false)}
                     className="p-1 hover:bg-slate-905 rounded-lg text-slate-400"
                   >
@@ -252,8 +252,8 @@ export default function RootLayout({
                         onClick={() => setIsMobileMenuOpen(false)}
                         className={cn(
                           "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition duration-200 border border-transparent",
-                          isActive 
-                            ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" 
+                          isActive
+                            ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
                             : "text-slate-400 hover:text-slate-200 hover:bg-slate-900/50"
                         )}
                       >

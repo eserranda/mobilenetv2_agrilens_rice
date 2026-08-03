@@ -55,10 +55,7 @@ class DiseasePredictor:
         self._device = artifacts.device
         self._preprocessor = VisionPreprocessor()
 
-    # ------------------------------------------------------------------
     # Public API
-    # ------------------------------------------------------------------
-
     def predict(self, image: Image.Image) -> PredictionResult:
         """Run inference on a PIL Image and return a structured prediction.
 

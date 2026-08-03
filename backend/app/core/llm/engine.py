@@ -19,13 +19,6 @@ logger = logging.getLogger(__name__)
 
 
 class LLMEngine:
-    """Client wrapper for interacting with an LLM provider API.
-
-    Usage:
-        engine = LLMEngine(api_key="sk-...", model="gpt-4o")
-        response = engine.complete(prompt="Explain brown spot in rice...")
-    """
-
     def __init__(self, api_key: str, model: str = "gpt-4o") -> None:
         self._api_key = api_key
         self._model = model
@@ -34,23 +27,8 @@ class LLMEngine:
         if api_key:
             self._initialize_client()
 
-    # ------------------------------------------------------------------
     # Public API
-    # ------------------------------------------------------------------
-
     def complete(self, prompt: str, temperature: float = 0.3) -> str:
-        """Send a prompt to the LLM and return the raw text response.
-
-        Args:
-            prompt: The full prompt string to send to the LLM.
-            temperature: Sampling temperature (0.0 = deterministic).
-
-        Returns:
-            The LLM's text response.
-
-        Raises:
-            RuntimeError: If the LLM client is not initialized.
-        """
         if not self._client:
             raise RuntimeError(
                 "LLM client is not initialized. "
@@ -71,18 +49,6 @@ class LLMEngine:
         return content
 
     def complete_json(self, prompt: str, temperature: float = 0.3) -> Dict:
-        """Send a prompt and parse the response as JSON.
-
-        Args:
-            prompt: The full prompt string.
-            temperature: Sampling temperature.
-
-        Returns:
-            Parsed JSON dict from the LLM response.
-
-        Raises:
-            ValueError: If the response cannot be parsed as JSON.
-        """
         raw = self.complete(prompt, temperature)
         try:
             return json.loads(raw)
@@ -152,10 +118,7 @@ class LLMEngine:
             # Fail-open: do not block prediction if API has an error
             return {"is_rice_plant": True, "reason": "Guardrail check failed to execute"}
 
-    # ------------------------------------------------------------------
     # Private Helpers
-    # ------------------------------------------------------------------
-
     def _initialize_client(self) -> None:
         """Initialize the LLM provider SDK client."""
         logger.info("Initializing OpenAI client...")
