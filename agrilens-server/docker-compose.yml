@@ -1,0 +1,18 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      network: host
+    container_name: agriLens-api
+    ports:
+      - "8000:8000"
+    # Membaca konfigurasi environment variables (seperti OPENAI_API_KEY) secara otomatis dari file .env
+    env_file:
+      - .env
+    # Volume mounting: Mengaitkan folder lokal ke dalam container untuk persistensi data.
+    volumes:
+      - ./models:/app/models
+      - ./uploads:/app/uploads
+      - ./db_data:/app/db_data
+    restart: always
