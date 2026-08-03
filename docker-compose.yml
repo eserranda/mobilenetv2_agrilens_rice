@@ -25,11 +25,13 @@ services:
     container_name: agriLens-web
     ports:
       - "3000:3000"
-    command: npm run dev
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-      - /app/.next
+    # --- PENGATURAN PRODUCTION VPS (Gunakan CMD default dari Dockerfile: node server.js) ---
+    # Hilangkan/komentari command & volumes di bawah ini untuk deploy di VPS
+    # command: npm run dev
+    # volumes:
+    #   - ./frontend:/app
+    #   - /app/node_modules
+    #   - /app/.next
     environment:
       - NEXT_PUBLIC_API_URL=http://localhost:8000
     depends_on:
