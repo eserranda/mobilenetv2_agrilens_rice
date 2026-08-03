@@ -8,12 +8,12 @@ __pycache__/
 *.pyd
 .Python
 *.egg-info/
-dist/
-build/
-eggs/
-lib/
-lib64/
-wheels/
+/dist/
+/build/
+/eggs/
+/lib/
+/lib64/
+/wheels/
 .installed.cfg
 *.egg
 
