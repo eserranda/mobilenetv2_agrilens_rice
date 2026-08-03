@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Geist, Geist_Mono } from "next/font/google";
 import {
   Leaf,
   History as HistoryIcon,
@@ -28,16 +27,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export default function RootLayout({
   children,
@@ -86,7 +75,7 @@ export default function RootLayout({
   };
 
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
+    <html lang="en" className="h-full antialiased">
       <body className="h-screen w-screen flex bg-slate-950 text-slate-100 font-sans overflow-hidden">
 
         {/* DESKTOP SIDEBAR */}
