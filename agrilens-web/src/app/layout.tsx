@@ -63,16 +63,28 @@ export default function RootLayout({
   };
 
   const menuItems = [
-    { name: "Detection", href: "/?reset=true", icon: Leaf },
+    { name: "Detection", href: "/detection?reset=true", icon: Leaf },
     { name: "History", href: "/history", icon: HistoryIcon },
-    { name: "Profile", href: "#", icon: User },
+    // { name: "Profile", href: "#", icon: User },
   ];
 
   const handleStartNewScan = () => {
     setIsMobileMenuOpen(false);
     // Navigate to root with reset param to trigger state clearing
-    router.push("/?reset=true");
+    router.push("/detection");
   };
+
+  const isLandingPage = pathname === "/";
+
+  if (isLandingPage) {
+    return (
+      <html lang="en" className="h-full antialiased scroll-smooth">
+        <body className="min-h-screen w-full bg-slate-50 text-slate-900 font-sans antialiased overflow-x-hidden selection:bg-emerald-500/20 selection:text-emerald-900">
+          {children}
+        </body>
+      </html>
+    );
+  }
 
   return (
     <html lang="en" className="h-full antialiased">
@@ -87,7 +99,7 @@ export default function RootLayout({
                 <Compass className="h-5 w-5" />
               </div>
               <div>
-                <h1 className="font-extrabold text-lg leading-none tracking-tight text-white">AgriLens Pro</h1>
+                <Link href="/" className="font-extrabold text-lg leading-none tracking-tight text-white">Agrilens Pro</Link>
                 <p className="text-[10px] text-emerald-500 font-semibold tracking-wider uppercase mt-1">Precision Diagnostics</p>
               </div>
             </div>
