@@ -64,6 +64,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     from app.db.session import engine
     from app.models.history import DetectionHistory  # Register models without shadowing app parameter
     from app.models.setting import AppSetting
+    from app.models.user import User
     import os
 
     # Ensure database directory exists for SQLite
@@ -131,10 +132,13 @@ def create_application() -> FastAPI:
     )
 
     # ---- CORS Middleware ------------------------------------------------
+    # Jika menggunakan wildcard '*', nonaktifkan credentials agar browser tidak menolak preflight.
+    # Jika menggunakan daftar domain spesifik, aktifkan credentials (True) secara aman.
+    allow_all_origins = "*" in settings.cors_origins_list
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origins_list,
-        allow_credentials=False,
+        allow_credentials=not allow_all_origins,
         allow_methods=["*"],
         allow_headers=["*"],
     )

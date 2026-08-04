@@ -24,6 +24,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.vision.predictor import DiseasePredictor
 from app.db.session import get_db
 from app.models.history import DetectionHistory
+from app.models.user import User
+from app.core.security import get_current_user
 from app.schemas.detection import DetectionResponse
 from app.utils.exceptions import ImageValidationError, PredictionError
 from app.utils.image_validator import validate_image
@@ -46,6 +48,7 @@ async def detect_disease(
     request: Request,
     file: UploadFile = File(..., description="Rice leaf image (JPG, PNG, WebP)"),
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ) -> DetectionResponse:
     """Accept an uploaded rice leaf image and return a disease prediction.
 
@@ -167,6 +170,7 @@ async def detect_disease(
     try:
         public_image_url = f"/static/uploads/{unique_filename}"
         history_entry = DetectionHistory(
+            user_id=current_user.id,
             filename=filename,
             image_path=public_image_url,
             disease=result.disease,

@@ -116,9 +116,9 @@ export default function Header({ children, rightActions }: HeaderProps) {
         </Dialog>
 
         {/* User Profile Avatar */}
-        <div className="h-8 w-8 rounded-full bg-slate-800 border border-slate-700 overflow-hidden flex items-center justify-center shrink-0">
+        {/* <div className="h-8 w-8 rounded-full bg-slate-800 border border-slate-700 overflow-hidden flex items-center justify-center shrink-0">
           <User className="h-4.5 w-4.5 text-slate-400" />
-        </div>
+        </div> */}
       </div>
     </header>
   );

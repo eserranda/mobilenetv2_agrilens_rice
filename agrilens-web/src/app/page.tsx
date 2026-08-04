@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Leaf,
@@ -16,6 +16,22 @@ import {
 } from "lucide-react";
 
 export default function LandingPage() {
+  const [username, setUsername] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem("agrilens_token");
+    const name = localStorage.getItem("agrilens_username");
+    const role = localStorage.getItem("agrilens_role");
+
+    if (token) {
+      setIsLoggedIn(true);
+      setUsername(name);
+      setUserRole(role);
+    }
+  }, []);
+
   const features = [
     {
       icon: Cpu,
@@ -74,12 +90,23 @@ export default function LandingPage() {
           </div>
 
           <div className="flex items-center gap-4">
-            <Link
-              href="/detection"
-              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-600/10 transition duration-200"
-            >
-              Coba Sekarang
-            </Link>
+            {isLoggedIn ? (
+              <div className="flex items-center gap-3">
+                <div className="flex flex-col text-right hidden sm:flex">
+                  <span className="text-xs font-bold text-slate-800 leading-none">Halo, {username}</span>
+                  {/* <span className="text-[9px] text-emerald-600 font-extrabold tracking-wide uppercase mt-0.5">{userRole === "admin" ? "Admin" : "User"}</span> */}
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center gap-3">
+                <Link
+                  href="/login"
+                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-600/10 transition duration-200"
+                >
+                  Masuk
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </header>

@@ -1,11 +1,7 @@
 """
 app/api/endpoints/history.py
 ================================
-History endpoints.
-
-Responsibilities:
-    - GET /api/v1/history (paginated list of past diagnoses)
-    - GET /api/v1/history/{id} (detailed diagnosis record by ID)
+History endpoints with Role-Based Access Control.
 """
 import logging
 import os
@@ -15,6 +11,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_db
 from app.models.history import DetectionHistory
+from app.models.user import User
+from app.core.security import get_current_user
 from app.schemas.history import HistoryDetailResponse, HistoryListResponse
 
 logger = logging.getLogger(__name__)
@@ -25,29 +23,44 @@ router = APIRouter()
     "/history",
     response_model=HistoryListResponse,
     summary="Get Detection History",
-    description="Retrieve a paginated list of past rice leaf disease detections.",
+    description="Retrieve a paginated list of past rice leaf disease detections. Users only see their own logs; admins see all.",
     tags=["History"],
 )
 async def get_history(
     page: int = Query(default=1, ge=1, description="Page number (1-indexed)"),
     size: int = Query(default=10, ge=1, le=100, description="Number of items per page"),
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ) -> HistoryListResponse:
-    """Return a paginated list of past detections."""
-    logger.info("History list requested | page=%d | size=%d", page, size)
+    """Return a paginated list of past detections, filtered by user ownership/role."""
+    logger.info("History list requested | page=%d | size=%d | user=%s", page, size, current_user.username)
 
-    # 1. Query total count
-    total_query = select(func.count()).select_from(DetectionHistory)
+    # 1. Base queries depending on role
+    if current_user.role == "admin":
+        total_query = select(func.count()).select_from(DetectionHistory)
+        items_query = (
+            select(DetectionHistory)
+            .order_by(DetectionHistory.created_at.desc())
+            .offset((page - 1) * size)
+            .limit(size)
+        )
+    else:
+        total_query = select(func.count()).select_from(DetectionHistory).where(
+            DetectionHistory.user_id == current_user.id
+        )
+        items_query = (
+            select(DetectionHistory)
+            .where(DetectionHistory.user_id == current_user.id)
+            .order_by(DetectionHistory.created_at.desc())
+            .offset((page - 1) * size)
+            .limit(size)
+        )
+
+    # 2. Execute count query
     total_result = await db.execute(total_query)
     total = total_result.scalar() or 0
 
-    # 2. Query paginated items ordered by newest first
-    items_query = (
-        select(DetectionHistory)
-        .order_by(DetectionHistory.created_at.desc())
-        .offset((page - 1) * size)
-        .limit(size)
-    )
+    # 3. Execute items query
     items_result = await db.execute(items_query)
     items = items_result.scalars().all()
 
@@ -69,9 +82,10 @@ async def get_history(
 async def get_history_detail(
     id: str,
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ) -> HistoryDetailResponse:
-    """Return details of a specific history entry."""
-    logger.info("History detail requested | id=%s", id)
+    """Return details of a specific history entry if owner or admin."""
+    logger.info("History detail requested | id=%s | user=%s", id, current_user.username)
 
     query = select(DetectionHistory).where(DetectionHistory.id == id)
     result = await db.execute(query)
@@ -81,6 +95,13 @@ async def get_history_detail(
         raise HTTPException(
             status_code=404,
             detail=f"History record with ID '{id}' not found.",
+        )
+
+    # Access control: Must be owner or admin
+    if current_user.role != "admin" and entry.user_id != current_user.id:
+        raise HTTPException(
+            status_code=403,
+            detail="Akses ditolak. Anda tidak memiliki akses ke riwayat diagnosa ini.",
         )
 
     return entry
@@ -96,9 +117,10 @@ async def get_history_detail(
 async def delete_history(
     id: str,
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
-    """Delete a history entry and its associated file."""
-    logger.info("Delete history entry requested | id=%s", id)
+    """Delete a history entry and its associated file if owner or admin."""
+    logger.info("Delete history entry requested | id=%s | user=%s", id, current_user.username)
 
     # 1. Fetch the entry first to find the image path
     query = select(DetectionHistory).where(DetectionHistory.id == id)
@@ -109,6 +131,13 @@ async def delete_history(
         raise HTTPException(
             status_code=404,
             detail=f"History record with ID '{id}' not found.",
+        )
+
+    # Access control: Must be owner or admin to delete
+    if current_user.role != "admin" and entry.user_id != current_user.id:
+        raise HTTPException(
+            status_code=403,
+            detail="Akses ditolak. Anda tidak memiliki izin untuk menghapus riwayat diagnosa ini.",
         )
 
     # 2. Attempt to delete the associated image file from disk

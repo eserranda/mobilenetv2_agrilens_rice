@@ -11,11 +11,13 @@ import {
   Menu,
   X,
   Compass,
-  Settings
+  Settings,
+  Users,
+  LogOut
 } from "lucide-react";
 import "./globals.css";
 import { cn } from "@/lib/utils";
-import { getSetting, updateSetting } from "@/lib/api";
+import { getSetting, updateSetting, logoutUser } from "@/lib/api";
 import {
   Dialog,
   DialogClose,
@@ -38,6 +40,29 @@ export default function RootLayout({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [openaiGuardrail, setOpenaiGuardrail] = useState<boolean>(true);
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [username, setUsername] = useState<string | null>(null);
+
+  const isAuthOrLandingPage = pathname === "/" || pathname === "/login" || pathname === "/register";
+
+  // Check login & route guards
+  useEffect(() => {
+    if (isAuthOrLandingPage) {
+      return;
+    }
+
+    const token = localStorage.getItem("agrilens_token");
+    const role = localStorage.getItem("agrilens_role");
+    const name = localStorage.getItem("agrilens_username");
+
+    if (!token) {
+      router.push("/login");
+      return;
+    }
+
+    setUserRole(role);
+    setUsername(name);
+  }, [pathname, router]);
 
   // Fetch setting on load
   useEffect(() => {
@@ -62,11 +87,22 @@ export default function RootLayout({
     }
   };
 
+  const handleLogout = () => {
+    logoutUser();
+    setUserRole(null);
+    setUsername(null);
+    router.push("/login");
+  };
+
+  // Define dynamic menu items based on user role
   const menuItems = [
     { name: "Detection", href: "/detection?reset=true", icon: Leaf },
     { name: "History", href: "/history", icon: HistoryIcon },
-    // { name: "Profile", href: "#", icon: User },
   ];
+
+  if (userRole === "admin") {
+    menuItems.push({ name: "Kelola Pengguna", href: "/users", icon: Users });
+  }
 
   const handleStartNewScan = () => {
     setIsMobileMenuOpen(false);
@@ -76,7 +112,7 @@ export default function RootLayout({
 
   const isLandingPage = pathname === "/";
 
-  if (isLandingPage) {
+  if (isAuthOrLandingPage) {
     return (
       <html lang="en" className="h-full antialiased scroll-smooth">
         <body className="min-h-screen w-full bg-slate-50 text-slate-900 font-sans antialiased overflow-x-hidden selection:bg-emerald-500/20 selection:text-emerald-900">
@@ -136,6 +172,28 @@ export default function RootLayout({
             >
               <Plus className="h-4.5 w-4.5" />
               Start New Scan
+            </button>
+          </div>
+
+          {/* User Profile & Logout Panel */}
+          <div className="p-4 border-t border-slate-900 bg-slate-950/80 flex items-center justify-between gap-3 shrink-0">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="h-8 w-8 rounded-xl bg-slate-900 flex items-center justify-center text-slate-300 font-bold border border-slate-800 shrink-0 text-xs">
+                {username ? username.charAt(0).toUpperCase() : "?"}
+              </div>
+              <div className="min-w-0">
+                <h5 className="text-xs font-bold text-white truncate leading-none">{username || "Pengguna"}</h5>
+                <span className="text-[9px] text-slate-500 font-medium capitalize mt-1 inline-block leading-none">{userRole || "User"}</span>
+              </div>
+            </div>
+
+            <button
+              onClick={handleLogout}
+              className="px-3 py-2 bg-slate-900/60 hover:bg-rose-500/10 hover:text-rose-400 hover:border-rose-500/20 active:bg-rose-500/20 border border-slate-900 rounded-lg flex items-center justify-center gap-1.5 transition duration-200 text-[10px] font-bold text-slate-400 shrink-0"
+              title="Keluar Akun"
+            >
+              <LogOut className="h-3.5 w-3.5" />
+              Keluar
             </button>
           </div>
         </aside>
@@ -211,9 +269,9 @@ export default function RootLayout({
                 </DialogContent>
               </Dialog>
 
-              <div className="h-8 w-8 rounded-full bg-slate-800 border border-slate-700 overflow-hidden flex items-center justify-center">
+              {/* <div className="h-8 w-8 rounded-full bg-slate-800 border border-slate-700 overflow-hidden flex items-center justify-center">
                 <User className="h-4.5 w-4.5 text-slate-400" />
-              </div>
+              </div> */}
             </div>
           </header>
 
@@ -265,8 +323,8 @@ export default function RootLayout({
                   })}
                 </nav>
 
-                {/* Scan Button */}
-                <div className="p-4 border-t border-slate-900">
+                {/* Scan Button & Logout */}
+                <div className="p-4 border-t border-slate-900 space-y-3 shrink-0">
                   <button
                     onClick={handleStartNewScan}
                     className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 rounded-xl font-bold flex items-center justify-center gap-2 transition duration-200 text-sm text-white"
@@ -274,6 +332,25 @@ export default function RootLayout({
                     <Plus className="h-4.5 w-4.5" />
                     Start New Scan
                   </button>
+
+                  <div className="pt-3 border-t border-slate-900/60 flex items-center justify-between">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="h-8 w-8 rounded-lg bg-slate-900 flex items-center justify-center text-slate-300 font-bold text-xs border border-slate-800">
+                        {username ? username.charAt(0).toUpperCase() : "?"}
+                      </div>
+                      <div className="min-w-0">
+                        <h5 className="text-xs font-bold text-white truncate leading-none">{username || "Pengguna"}</h5>
+                        <span className="text-[9px] text-slate-500 font-medium capitalize mt-0.5 inline-block">{userRole || "User"}</span>
+                      </div>
+                    </div>
+                    <button
+                      onClick={handleLogout}
+                      className="p-2 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition"
+                      title="Keluar"
+                    >
+                      <LogOut className="h-4 w-4" />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
