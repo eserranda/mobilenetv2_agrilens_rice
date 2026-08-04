@@ -52,7 +52,7 @@ export default function HistoryPage() {
       setTotalItems(response.total);
       setCurrentPage(page);
     } catch (err) {
-      setError("Gagal memuat riwayat diagnosis. Pastikan backend sudah aktif.");
+      setError("Gagal memuat riwayat diagnosis");
     } finally {
       setIsLoading(false);
     }
